@@ -1,0 +1,131 @@
+{{ $data := partial "data_bundle.html" . }}
+{{ $orgName := $data.org.orgName | default "" }}
+{{ $orgLogo := $data.org.logoPath | default "" }}
+{{ with $data.settings.branding.logo }}{{ $orgLogo = . }}{{ end }}
+
+{{ $orgSlug := $data.org.orgId | default (.Site.Params.orgSlug | default "") }}
+{{ $eventsPath := "/calendar/" }}
+{{ if ne $orgSlug "" }}{{ $eventsPath = printf "/%s/calendar/" $orgSlug }}{{ end }}
+
+{{ $navItems := slice }}
+{{ with $data.navigation.items }}{{ $navItems = . }}{{ end }}
+{{ $navSorted := sort $navItems "order" "asc" }}
+{{ $showDropdown := gt (len $navSorted) 5 }}
+{{ $visibleNav := $navSorted }}
+{{ if $showDropdown }}
+  {{ $visibleNav = first 4 $navSorted }}
+{{ end }}
+{{ $overflowNav := slice }}
+{{ if $showDropdown }}
+  {{ $overflowNav = after 4 $navSorted }}
+{{ end }}
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="site-brand">
+      {{ if ne $orgLogo "" }}
+      <img class="site-logo" src="{{ $orgLogo }}" alt="{{ $orgName }} logo">
+      {{ end }}
+      <span class="site-org-name">{{ $orgName }}</span>
+    </div>
+
+    <button
+      id="menu-toggle"
+      class="menu-toggle"
+      aria-label="Toggle navigation menu"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      type="button"
+    >
+      <span class="menu-toggle-line"></span>
+      <span class="menu-toggle-line"></span>
+      <span class="menu-toggle-line"></span>
+    </button>
+
+    <nav id="site-nav" class="site-nav" aria-label="Primary">
+      {{ range $visibleNav }}
+        {{ $label := title (lower (printf "%v" (index . "label" | default ""))) }}
+        {{ $url := index . "url" | default "" }}
+        {{ if and (eq $url "") (isset . "children") }}
+          {{ $children := index . "children" }}
+          {{ if gt (len $children) 0 }}
+            {{ $url = index (index $children 0) "url" | default "" }}
+          {{ end }}
+        {{ end }}
+        {{ if eq $label "Events" }}{{ $url = $eventsPath }}{{ end }}
+        <a class="nav-link" href="{{ $url }}">{{ $label }}</a>
+      {{ end }}
+
+      {{ if $showDropdown }}
+        {{ $trigger := title (lower (printf "%v" (index (index $overflowNav 0) "label" | default "More"))) }}
+        <details class="nav-dropdown">
+          <summary class="nav-link nav-dropdown-trigger">{{ $trigger }}</summary>
+          <div class="nav-dropdown-menu">
+            {{ $overflowLimit := 5 }}
+            {{ if lt (len $overflowNav) 5 }}{{ $overflowLimit = len $overflowNav }}{{ end }}
+            {{ range first $overflowLimit $overflowNav }}
+              {{ $label := title (lower (printf "%v" (index . "label" | default ""))) }}
+              {{ $url := index . "url" | default "" }}
+              {{ if and (eq $url "") (isset . "children") }}
+                {{ $children := index . "children" }}
+                {{ if gt (len $children) 0 }}
+                  {{ $url = index (index $children 0) "url" | default "" }}
+                {{ end }}
+              {{ end }}
+              {{ if eq $label "Events" }}{{ $url = $eventsPath }}{{ end }}
+              <a class="nav-dropdown-link" href="{{ $url }}">{{ $label }}</a>
+            {{ end }}
+            {{ if gt (len $overflowNav) 5 }}
+              <a class="nav-dropdown-link" href="/pages">More</a>
+            {{ end }}
+          </div>
+        </details>
+      {{ end }}
+
+      <button
+        id="theme-toggle"
+        aria-label="Toggle theme"
+        class="theme-toggle"
+        type="button"
+      >
+        <svg
+          class="icon icon-moon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" />
+        </svg>
+
+        <svg
+          class="icon icon-sun"
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" />
+          <path d="M12 20v2" />
+          <path d="M4.93 4.93l1.41 1.41" />
+          <path d="M17.66 17.66l1.41 1.41" />
+          <path d="M2 12h2" />
+          <path d="M20 12h2" />
+          <path d="M4.93 19.07l1.41-1.41" />
+          <path d="M17.66 6.34l1.41-1.41" />
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>

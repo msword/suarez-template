@@ -1,0 +1,7 @@
+{{ define "main" }}
+<article class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  {{ with .Params.pageDesc }}<p class="lead">{{ . }}</p>{{ end }}
+  <div class="prose">{{ .Content }}</div>
+</article>
+{{ end }}

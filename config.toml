@@ -1,0 +1,16 @@
+baseURL = "https://example.com/"
+languageCode = "en-us"
+title = "BuzzPoint Pages"
+
+[params]
+  description = "BuzzPoint Pages"
+  orgName = "BuzzPoint"
+  orgSlug = "matthew-sword"
+  orgLogo = ""
+  orgAddress = ""
+  environment = "DEV"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  <ul class="meta-list">
+    {{ with .Params.location }}<li>Location: {{ . }}</li>{{ end }}
+    {{ with .Params.startDate }}<li>Start Date: {{ . }}</li>{{ end }}
+    {{ with .Params.endDate }}<li>End Date: {{ . }}</li>{{ end }}
+  </ul>
+  <div class="prose">{{ .Content }}</div>
+</article>
+{{ end }}

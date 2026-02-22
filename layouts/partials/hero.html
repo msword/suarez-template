@@ -1,0 +1,36 @@
+{{ $slides := .slides | default (slice) }}
+{{ $slideCount := len $slides }}
+
+<section class="hero hero-carousel" aria-label="Hero" {{ if gt $slideCount 1 }}data-carousel="hero"{{ end }}>
+  {{ if gt $slideCount 0 }}
+    <div class="hero-slides">
+      {{ range $i, $slide := $slides }}
+        {{ $image := index $slide "image" | default "" }}
+        {{ $title := index $slide "title" | default "" }}
+        {{ $subtitle := index $slide "subtitle" | default "" }}
+        <div class="hero-slide{{ if eq $i 0 }} is-active{{ end }}" data-slide-index="{{ $i }}" {{ if ne $image "" }}style="background-image: url('{{ $image }}');"{{ end }}>
+          <div class="hero-overlay">
+            {{ if ne $title "" }}<h1 class="hero-title">{{ $title }}</h1>{{ end }}
+            {{ if ne $subtitle "" }}<p class="hero-subtitle">{{ $subtitle }}</p>{{ end }}
+          </div>
+        </div>
+      {{ end }}
+    </div>
+
+    {{ if gt $slideCount 1 }}
+      <div class="hero-dots" role="tablist" aria-label="Hero slide selection">
+        {{ range $i, $_ := $slides }}
+          <button
+            type="button"
+            class="hero-dot{{ if eq $i 0 }} is-active{{ end }}"
+            data-dot-index="{{ $i }}"
+            aria-label="Go to hero slide {{ add $i 1 }}"
+            aria-selected="{{ if eq $i 0 }}true{{ else }}false{{ end }}"
+          ></button>
+        {{ end }}
+      </div>
+    {{ end }}
+  {{ else }}
+    <div class="hero-slide is-active"></div>
+  {{ end }}
+</section>

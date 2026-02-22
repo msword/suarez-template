@@ -1,0 +1,23 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "svelte.plugin.typescript.diagnostics.enable": true,
+  "tailwindCSS.emmetCompletions": true,
+  "editor.quickSuggestions": { "strings": true },
+  "eslint.validate": ["svelte", "javascript", "typescript"],
+  "files.associations": { "*.svelte": "svelte" },
+
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#bd7313",
+    "titleBar.activeForeground": "#1f201e",
+    "activityBar.background": "#35322e",
+    "activityBar.foreground": "#beb9b9",
+    "statusBar.background": "#bd7313",
+    "statusBar.foreground": "#beb9b9",
+    "focusBorder": "#c37a0c"
+  },
+  "window.title": "BuzzPoint — Fleetwood — ${activeEditorShort}",
+
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "python.terminal.activateEnvironment": true
+}

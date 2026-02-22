@@ -1,0 +1,170 @@
+{{ $org := dict }}
+{{ $navigation := dict }}
+{{ $settings := dict }}
+{{ $hero := dict "slides" (slice) }}
+{{ $calendar := dict "events" (slice) }}
+{{ $home := dict "sections" (slice) }}
+{{ $generatedAt := "" }}
+
+{{ with site.Data.org }}{{ $org = . }}{{ end }}
+{{ with site.Data.navigation }}{{ $navigation = . }}{{ end }}
+{{ with site.Data.site.settings }}{{ $settings = . }}{{ end }}
+{{ with site.Data.hero }}
+  {{ if reflect.IsSlice . }}
+    {{ $hero = dict "slides" . }}
+  {{ else }}
+    {{ $hero = . }}
+  {{ end }}
+{{ end }}
+{{ with site.Data.calendar.events }}
+  {{ if reflect.IsSlice . }}
+    {{ $calendar = dict "events" . }}
+  {{ else }}
+    {{ $calendar = . }}
+  {{ end }}
+{{ end }}
+{{ with site.Data.home.sections }}
+  {{ if reflect.IsSlice . }}
+    {{ $home = dict "sections" . }}
+  {{ else }}
+    {{ $home = . }}
+  {{ end }}
+{{ end }}
+
+{{ with site.Data.meta.site }}
+  {{ with .org }}{{ $org = . }}{{ end }}
+  {{ with .navigation }}{{ $navigation = . }}{{ end }}
+  {{ with .settings }}{{ $settings = . }}{{ end }}
+  {{ with .hero }}
+    {{ if reflect.IsSlice . }}
+      {{ $hero = dict "slides" . }}
+    {{ else }}
+      {{ $hero = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .calendar }}
+    {{ if reflect.IsSlice . }}
+      {{ $calendar = dict "events" . }}
+    {{ else }}
+      {{ $calendar = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .home }}
+    {{ if reflect.IsSlice . }}
+      {{ $home = dict "sections" . }}
+    {{ else }}
+      {{ $home = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .generatedAt }}{{ $generatedAt = . }}{{ end }}
+{{ end }}
+
+{{ if or (eq (len $org) 0) (eq (len $navigation) 0) (eq (len ($home.sections | default (slice))) 0) }}
+  {{ $orgID := site.Params.orgSlug | default "" }}
+  {{ if ne $orgID "" }}
+    {{ $exportRoot := printf "sitecms-export/%s" $orgID }}
+    {{ if fileExists $exportRoot }}
+      {{ $dirs := readDir $exportRoot }}
+      {{ $latest := "" }}
+      {{ range sort $dirs "Name" "desc" }}
+        {{ if and .IsDir (eq $latest "") }}{{ $latest = .Name }}{{ end }}
+      {{ end }}
+
+      {{ if ne $latest "" }}
+        {{ $metaPath := printf "%s/%s/data/meta/site.yaml" $exportRoot $latest }}
+        {{ if fileExists $metaPath }}
+          {{ $meta := readFile $metaPath | transform.Unmarshal }}
+          {{ with $meta.org }}{{ $org = . }}{{ end }}
+          {{ with $meta.navigation }}{{ $navigation = . }}{{ end }}
+          {{ with $meta.settings }}{{ $settings = . }}{{ end }}
+          {{ with $meta.hero }}
+            {{ if reflect.IsSlice . }}
+              {{ $hero = dict "slides" . }}
+            {{ else }}
+              {{ $hero = . }}
+            {{ end }}
+          {{ end }}
+          {{ with $meta.calendar }}
+            {{ if reflect.IsSlice . }}
+              {{ $calendar = dict "events" . }}
+            {{ else }}
+              {{ $calendar = . }}
+            {{ end }}
+          {{ end }}
+          {{ with $meta.home }}
+            {{ if reflect.IsSlice . }}
+              {{ $home = dict "sections" . }}
+            {{ else }}
+              {{ $home = . }}
+            {{ end }}
+          {{ end }}
+          {{ with $meta.generatedAt }}{{ $generatedAt = . }}{{ end }}
+
+          {{ if eq (len ($home.sections | default (slice))) 0 }}
+            {{ $homePathYaml := printf "%s/%s/data/home/sections.yaml" $exportRoot $latest }}
+            {{ $homePathYml := printf "%s/%s/data/home/sections.yml" $exportRoot $latest }}
+            {{ if fileExists $homePathYaml }}
+              {{ $homeDoc := readFile $homePathYaml | transform.Unmarshal }}
+              {{ if reflect.IsSlice $homeDoc }}
+                {{ $home = dict "sections" $homeDoc }}
+              {{ else }}
+                {{ $home = $homeDoc }}
+              {{ end }}
+            {{ else if fileExists $homePathYml }}
+              {{ $homeDoc := readFile $homePathYml | transform.Unmarshal }}
+              {{ if reflect.IsSlice $homeDoc }}
+                {{ $home = dict "sections" $homeDoc }}
+              {{ else }}
+                {{ $home = $homeDoc }}
+              {{ end }}
+            {{ end }}
+          {{ end }}
+        {{ else }}
+          {{ $orgPath := printf "%s/%s/data/org.yaml" $exportRoot $latest }}
+          {{ $navPath := printf "%s/%s/data/navigation.yaml" $exportRoot $latest }}
+          {{ $settingsPath := printf "%s/%s/data/site/settings.yaml" $exportRoot $latest }}
+          {{ $heroPath := printf "%s/%s/data/hero.yaml" $exportRoot $latest }}
+          {{ $eventsPath := printf "%s/%s/data/calendar/events.yaml" $exportRoot $latest }}
+          {{ $homePath := printf "%s/%s/data/home/sections.yaml" $exportRoot $latest }}
+          {{ $homePathAlt := printf "%s/%s/data/home/sections.yml" $exportRoot $latest }}
+          {{ if fileExists $orgPath }}{{ $org = readFile $orgPath | transform.Unmarshal }}{{ end }}
+          {{ if fileExists $navPath }}{{ $navigation = readFile $navPath | transform.Unmarshal }}{{ end }}
+          {{ if fileExists $settingsPath }}{{ $settings = readFile $settingsPath | transform.Unmarshal }}{{ end }}
+          {{ if fileExists $heroPath }}
+            {{ $heroDoc := readFile $heroPath | transform.Unmarshal }}
+            {{ if reflect.IsSlice $heroDoc }}
+              {{ $hero = dict "slides" $heroDoc }}
+            {{ else }}
+              {{ $hero = $heroDoc }}
+            {{ end }}
+          {{ end }}
+          {{ if fileExists $eventsPath }}
+            {{ $eventsDoc := readFile $eventsPath | transform.Unmarshal }}
+            {{ if reflect.IsSlice $eventsDoc }}
+              {{ $calendar = dict "events" $eventsDoc }}
+            {{ else }}
+              {{ $calendar = $eventsDoc }}
+            {{ end }}
+          {{ end }}
+          {{ if fileExists $homePath }}
+            {{ $homeDoc := readFile $homePath | transform.Unmarshal }}
+            {{ if reflect.IsSlice $homeDoc }}
+              {{ $home = dict "sections" $homeDoc }}
+            {{ else }}
+              {{ $home = $homeDoc }}
+            {{ end }}
+          {{ else if fileExists $homePathAlt }}
+            {{ $homeDoc := readFile $homePathAlt | transform.Unmarshal }}
+            {{ if reflect.IsSlice $homeDoc }}
+              {{ $home = dict "sections" $homeDoc }}
+            {{ else }}
+              {{ $home = $homeDoc }}
+            {{ end }}
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return (dict "org" $org "navigation" $navigation "settings" $settings "hero" $hero "calendar" $calendar "home" $home "generatedAt" $generatedAt) }}

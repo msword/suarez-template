@@ -1,0 +1,11 @@
+{{ define "main" }}
+<section>
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div>{{ . }}</div>{{ end }}
+  <ul>
+    {{ range where .RegularPages "Draft" false }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    {{ end }}
+  </ul>
+</section>
+{{ end }}

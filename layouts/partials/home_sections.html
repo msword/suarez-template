@@ -1,0 +1,156 @@
+{{ $sections := .sections | default (slice) }}
+{{ $active := slice }}
+{{ range $sections }}
+  {{ if or (not (isset . "active")) (index . "active") }}
+    {{ $active = $active | append . }}
+  {{ end }}
+{{ end }}
+
+{{ range sort $active "order" "asc" }}
+  {{ $columnsRaw := index . "columns" | default 1 }}
+  {{ $columns := 1 }}
+  {{ if eq (printf "%v" $columnsRaw) "2" }}{{ $columns = 2 }}{{ end }}
+  {{ $layout := index . "layout" | default "content_left_image_right" }}
+  {{ $left := index . "left" | default dict }}
+  {{ $right := index . "right" | default dict }}
+  {{ $mediaUrl := index . "mediaUrl" | default "" }}
+
+  {{ if and (eq $columns 2) (eq (len $left) 0) (eq (len $right) 0) (ne $mediaUrl "") }}
+    {{ $left = dict "type" "content" "title" (index . "title" | default "") "subtitle" (index . "subtitle" | default "") "bodyMarkdown" (index . "bodyMarkdown" | default "") "items" (index . "items" | default (slice)) "ctaLabel" (index . "ctaLabel" | default "") "ctaUrl" (index . "ctaUrl" | default "") }}
+    {{ $right = dict "type" "image" "imageUrl" $mediaUrl }}
+  {{ end }}
+
+  {{ if eq $columns 2 }}
+    {{ if and (eq (len $left) 0) (eq (len $right) 0) }}
+      {{ $left = dict "type" "content" "title" (index . "title" | default "") "subtitle" (index . "subtitle" | default "") "bodyMarkdown" (index . "bodyMarkdown" | default "") "items" (index . "items" | default (slice)) "ctaLabel" (index . "ctaLabel" | default "") "ctaUrl" (index . "ctaUrl" | default "") }}
+      {{ $right = dict "type" "content" }}
+    {{ end }}
+
+    <section class="home-section home-section-two-col" data-component="{{ index . "component" | default "content" }}" data-layout="{{ $layout }}">
+      {{ $leftType := index $left "type" | default "" }}
+      {{ $rightType := index $right "type" | default "" }}
+
+      {{ if and (eq $leftType "") (eq $rightType "") }}
+        {{ if eq $layout "image_left_content_right" }}
+          {{ $leftType = "image" }}
+          {{ $rightType = "content" }}
+        {{ else if eq $layout "content_left_image_right" }}
+          {{ $leftType = "content" }}
+          {{ $rightType = "image" }}
+        {{ else if eq $layout "image_left_image_right" }}
+          {{ $leftType = "image" }}
+          {{ $rightType = "image" }}
+        {{ else if eq $layout "content_left_content_right" }}
+          {{ $leftType = "content" }}
+          {{ $rightType = "content" }}
+        {{ end }}
+      {{ end }}
+
+      {{ if eq $leftType "" }}{{ $leftType = "content" }}{{ end }}
+      {{ if eq $rightType "" }}{{ $rightType = "content" }}{{ end }}
+
+      <div class="home-section-content">
+        {{ if eq $leftType "image" }}
+          {{ $leftImage := index $left "imageUrl" | default (index $left "mediaUrl" | default "") }}
+          {{ if ne $leftImage "" }}
+            <div class="home-section-media">
+              <img src="{{ $leftImage }}" alt="" class="home-section-image">
+            </div>
+          {{ end }}
+        {{ else }}
+          {{ with index $left "title" }}<h2>{{ . }}</h2>{{ else }}{{ with index . "title" }}<h2>{{ . }}</h2>{{ end }}{{ end }}
+          {{ with index $left "subtitle" }}<p class="subtitle">{{ . }}</p>{{ else }}{{ with index . "subtitle" }}<p class="subtitle">{{ . }}</p>{{ end }}{{ end }}
+          {{ $leftBody := index $left "bodyMarkdown" | default (index . "bodyMarkdown" | default "") }}
+          {{ with $leftBody }}<div class="broadcast-body">{{ . | markdownify }}</div>{{ end }}
+
+          {{ $leftItems := index $left "items" | default (index . "items" | default (slice)) }}
+          {{ if gt (len $leftItems) 0 }}
+            <ul class="home-section-items">
+              {{ range $leftItems }}
+                <li>
+                  {{ with index . "title" }}<strong>{{ . }}</strong>{{ end }}
+                  {{ with index . "text" }}<span>{{ . }}</span>{{ end }}
+                  {{ with index . "label" }}<span>{{ . }}</span>{{ end }}
+                </li>
+              {{ end }}
+            </ul>
+          {{ end }}
+
+          {{ $leftCtaLabel := index $left "ctaLabel" | default (index . "ctaLabel" | default "") }}
+          {{ $leftCtaUrl := index $left "ctaUrl" | default (index . "ctaUrl" | default "") }}
+          {{ if and (ne $leftCtaLabel "") (ne $leftCtaUrl "") }}
+            <p><a class="nav-link" href="{{ $leftCtaUrl }}">{{ $leftCtaLabel }}</a></p>
+          {{ end }}
+        {{ end }}
+      </div>
+
+      <div class="home-section-content">
+        {{ if eq $rightType "image" }}
+          {{ $rightImage := index $right "imageUrl" | default (index $right "mediaUrl" | default "") }}
+          {{ if and (eq $rightImage "") (ne $mediaUrl "") }}{{ $rightImage = $mediaUrl }}{{ end }}
+          {{ if ne $rightImage "" }}
+            <div class="home-section-media">
+              <img src="{{ $rightImage }}" alt="" class="home-section-image">
+            </div>
+          {{ end }}
+        {{ else }}
+          {{ with index $right "title" }}<h2>{{ . }}</h2>{{ end }}
+          {{ with index $right "subtitle" }}<p class="subtitle">{{ . }}</p>{{ end }}
+          {{ with index $right "bodyMarkdown" }}<div class="broadcast-body">{{ . | markdownify }}</div>{{ end }}
+
+          {{ $rightItems := index $right "items" | default (slice) }}
+          {{ if gt (len $rightItems) 0 }}
+            <ul class="home-section-items">
+              {{ range $rightItems }}
+                <li>
+                  {{ with index . "title" }}<strong>{{ . }}</strong>{{ end }}
+                  {{ with index . "text" }}<span>{{ . }}</span>{{ end }}
+                  {{ with index . "label" }}<span>{{ . }}</span>{{ end }}
+                </li>
+              {{ end }}
+            </ul>
+          {{ end }}
+
+          {{ $rightCtaLabel := index $right "ctaLabel" | default "" }}
+          {{ $rightCtaUrl := index $right "ctaUrl" | default "" }}
+          {{ if and (ne $rightCtaLabel "") (ne $rightCtaUrl "") }}
+            <p><a class="nav-link" href="{{ $rightCtaUrl }}">{{ $rightCtaLabel }}</a></p>
+          {{ end }}
+        {{ end }}
+      </div>
+    </section>
+  {{ else }}
+    <section class="home-section" data-component="{{ index . "component" | default "content" }}">
+      {{ with index . "title" }}<h2>{{ . }}</h2>{{ end }}
+      {{ with index . "subtitle" }}<p class="subtitle">{{ . }}</p>{{ end }}
+      {{ with index . "bodyMarkdown" }}
+        <div class="broadcast-body">{{ . | markdownify }}</div>
+      {{ end }}
+
+      {{ $items := index . "items" | default (slice) }}
+      {{ if gt (len $items) 0 }}
+        <ul class="home-section-items">
+          {{ range $items }}
+            <li>
+              {{ with index . "title" }}<strong>{{ . }}</strong>{{ end }}
+              {{ with index . "text" }}<span>{{ . }}</span>{{ end }}
+              {{ with index . "label" }}<span>{{ . }}</span>{{ end }}
+            </li>
+          {{ end }}
+        </ul>
+      {{ end }}
+
+      {{ $ctaLabel := index . "ctaLabel" | default "" }}
+      {{ $ctaUrl := index . "ctaUrl" | default "" }}
+      {{ if and (ne $ctaLabel "") (ne $ctaUrl "") }}
+        <p><a class="nav-link" href="{{ $ctaUrl }}">{{ $ctaLabel }}</a></p>
+      {{ end }}
+
+      {{ if ne $mediaUrl "" }}
+        <div class="home-section-media">
+          <img src="{{ $mediaUrl }}" alt="" class="home-section-image">
+        </div>
+      {{ end }}
+    </section>
+  {{ end }}
+{{ end }}

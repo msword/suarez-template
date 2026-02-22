@@ -1,0 +1,22 @@
+{{ $data := partial "data_bundle.html" . }} {{ $address := "" }} {{ with
+$data.org.profile.address }} {{ $parts := slice .line1 .line2 .city .state
+.postalCode .country }} {{ $clean := slice }} {{ range $parts }}{{ if ne . ""
+}}{{ $clean = $clean | append . }}{{ end }}{{ end }} {{ $address = delimit
+$clean ", " }} {{ end }}
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-left"></div>
+    <div class="footer-center">
+      <div class="footer-address">{{ $address }}</div>
+      <div class="footer-tagline">
+        &copy; {{ now.Format "2006" }} BuzzPoint | Built with ❤️ for communities
+      </div>
+      <div class="footer-version">
+        Last updated: {{ now.Format "2006-01-02 15:04 MST" }}
+      </div>
+    </div>
+
+    <div class="footer-right"></div>
+  </div>
+</footer>

@@ -1,0 +1,15 @@
+# Hugo build outputs
+/public/
+/output/
+
+# Local/export snapshots (generated content workspaces)
+/sitecms-export/
+/sitecms-local/
+/generated/
+
+# Hugo build lock
+.hugo_build.lock
+
+# macOS / editor noise
+.DS_Store
+.vscode/*.log

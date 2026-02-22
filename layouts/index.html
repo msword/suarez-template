@@ -1,0 +1,14 @@
+{{ define "main" }}
+{{ $data := partial "data_bundle.html" . }}
+{{ $slides := $data.hero.slides | default (slice) }}
+{{ $sections := $data.home.sections | default (slice) }}
+{{ $active := slice }}
+{{ range $slides }}
+  {{ if or (not (isset . "active")) (index . "active") }}
+    {{ $active = $active | append . }}
+  {{ end }}
+{{ end }}
+{{ $activeSorted := sort $active "order" "asc" }}
+{{ partial "hero.html" (dict "slides" $activeSorted) }}
+{{ partial "home_sections.html" (dict "sections" $sections) }}
+{{ end }}

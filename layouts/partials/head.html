@@ -1,0 +1,16 @@
+{{ $data := partial "data_bundle.html" . }}
+{{ $title := .Site.Title }}
+{{ $description := "" }}
+
+{{ with $data.settings.meta.title }}{{ $title = . }}{{ end }}
+{{ with $data.settings.meta.description }}{{ $description = . }}{{ end }}
+{{ with .Params.pageDesc }}{{ $description = . }}{{ end }}
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ $title }}{{ else }}{{ .Title }} | {{ $title }}{{ end }}</title>
+  <meta name="description" content="{{ $description }}">
+  <link rel="icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="/assets/pages.css">
+</head>

@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  <ul class="meta-list">
+    <li>Level: {{ .Params.level | default "TBD" }}</li>
+    {{ with .Params.gender }}<li>Gender: {{ . | title }}</li>{{ end }}
+    {{ with .Params.federationId }}<li>Federation ID: {{ . }}</li>{{ end }}
+  </ul>
+  <div class="prose">{{ .Content }}</div>
+</article>
+{{ end }}

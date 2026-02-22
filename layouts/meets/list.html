@@ -1,0 +1,19 @@
+{{ define "main" }}
+<section class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  <p class="lead">Meet schedule and event previews.</p>
+  <div class="card-grid">
+    {{ $pages := where .RegularPages "Draft" false }}
+    {{ range sort $pages "Params.startDate" "desc" }}
+      {{ $status := .Params.status | default "active" }}
+      {{ if eq $status "active" }}
+      <article class="card">
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        {{ with .Params.location }}<p>{{ . }}</p>{{ end }}
+        <p>{{ .Params.startDate }}{{ with .Params.endDate }} to {{ . }}{{ end }}</p>
+      </article>
+      {{ end }}
+    {{ end }}
+  </div>
+</section>
+{{ end }}
