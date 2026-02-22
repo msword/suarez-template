@@ -243,6 +243,26 @@ Navigation UI rules implemented in templates:
 
 No runtime API calls are required to build a calendar page.
 
+## War Room UI Update: Brand Colors + Footer
+
+New template behavior consumes theme colors from `meta/site` and applies them globally:
+
+1. Header navigation links:
+   - light mode uses `primaryColor`
+   - dark mode uses `accentColor` for contrast safety
+2. Footer:
+   - background uses `primaryColor`
+   - text and icon color uses `accentColor`
+   - min-height is `300px`
+3. Footer social links:
+   - render only when social URL exists in exported org social maps
+   - use inline icon set aligned with current moon/sun SVG style
+4. Brand color source priority:
+   1. `settings.theme.primaryColor` / `settings.theme.accentColor`
+   2. fallback `org.branding.primaryColor` / `org.branding.accentColor`
+
+This is the new baseline format to consume for Suarez branding behavior.
+
 ---
 
 ## Implementation References

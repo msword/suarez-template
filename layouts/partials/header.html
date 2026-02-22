@@ -1,7 +1,12 @@
 {{ $data := partial "data_bundle.html" . }}
 {{ $orgName := $data.org.orgName | default "" }}
 {{ $orgLogo := $data.org.logoPath | default "" }}
+{{ $logoURL := "" }}
+{{ with $data.org.branding.logoUrl }}{{ $logoURL = . }}{{ end }}
+{{ with $data.settings.branding.logoUrl }}{{ $logoURL = . }}{{ end }}
+{{ if ne $logoURL "" }}{{ $orgLogo = $logoURL }}{{ end }}
 {{ with $data.settings.branding.logo }}{{ $orgLogo = . }}{{ end }}
+{{ if eq $orgLogo "" }}{{ $orgLogo = "/images/logo.jpg" }}{{ end }}
 
 {{ $orgSlug := $data.org.orgId | default (.Site.Params.orgSlug | default "") }}
 {{ $eventsPath := "/calendar/" }}
@@ -26,7 +31,9 @@
       {{ if ne $orgLogo "" }}
       <img class="site-logo" src="{{ $orgLogo }}" alt="{{ $orgName }} logo">
       {{ end }}
+      {{ if eq $orgLogo "" }}
       <span class="site-org-name">{{ $orgName }}</span>
+      {{ end }}
     </div>
 
     <button

@@ -46,3 +46,20 @@ Status: Active implementation baseline
 2. Hero supports single-image or multi-slide carousel.
 3. Multi-slide hero uses vanilla JS (no jQuery) with indicator dots.
 4. Hero is constrained to `main.page-main` width and sits directly under header border.
+
+## Branding Color Rules
+
+1. Brand colors are sourced from export metadata:
+   - `site.Data.meta.site.settings.theme.primaryColor`
+   - `site.Data.meta.site.settings.theme.accentColor`
+   - with fallback to `site.Data.meta.site.org.branding.*`
+2. Header navigation links use the brand primary color in light mode.
+3. Dark mode keeps accessibility contrast by using brand accent for nav links/icon.
+4. Footer background uses brand primary and footer text/icons use brand accent.
+
+## Footer Rules
+
+1. Footer minimum height is `300px`.
+2. Footer links are always underlined and include a hover emphasis state.
+3. If social URLs are present in exported org data, render icon links.
+4. Social icons use the same inline SVG icon style family as theme icons.
