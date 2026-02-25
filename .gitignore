@@ -31,3 +31,4 @@ vertical_builder/__pycache__/config.cpython-311.pyc
 vertical_builder/__pycache__/deploy_service.cpython-311.pyc
 vertical_builder/__pycache__/lock_service.cpython-311.pyc
 vertical_builder/__pycache__/receipt_service.cpython-311.pyc
+.env

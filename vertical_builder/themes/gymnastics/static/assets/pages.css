@@ -173,9 +173,9 @@ a:hover {
 
 main {
   width: 100%;
-  max-width: 64rem;
+  max-width: 1400px; /* allow real desktop width */
   margin: 0 auto;
-  padding: 4rem 0;
+  padding: 4rem 2rem;
 }
 
 section {
@@ -202,12 +202,9 @@ section {
 
 /* Document shell */
 .page-shell {
-  max-width: 64rem; /* same as max-w-5xl */
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
-  background: var(--page-bg);
-  display: flex;
-  flex-direction: column;
+  padding: 0 2rem;
 }
 
 /* Main content spacing */
@@ -896,71 +893,45 @@ footer {
   font-size: 0.84rem;
 }
 
+/* =========================
+   TRUE FLUID TABLE
+   ========================= */
+
 .scores-table-wrap,
 .table-wrap {
   overflow-x: auto;
+  overflow-y: visible; /* THIS FIXES CLIPPING */
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--bg);
+  position: relative;
 }
-
 .scores-table {
   width: 100%;
-  min-width: 1280px;
+  table-layout: auto; /* allow browser to distribute */
   border-collapse: collapse;
   font-size: 0.86rem;
 }
 
+/* Remove forced nowrap except for score cells */
 .scores-table th,
 .scores-table td {
-  padding: 0.5rem 0.55rem;
+  padding: 0.6rem 0.7rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
+  white-space: normal; /* THIS is key */
+}
+
+/* Only score values stay nowrap */
+.scores-cell.event,
+.score-chip {
   white-space: nowrap;
 }
 
-.scores-table thead th {
-  background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg) 93%);
-  font-weight: 700;
-  color: var(--fg);
-}
-
-.scores-table tbody tr:nth-child(even) {
-  background: color-mix(in srgb, var(--border) 35%, var(--bg) 65%);
-}
-
-.scores-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.scores-row {
-  border-top: 1px solid var(--border);
-  transition: background-color 150ms ease;
-}
-
-.scores-row.clickable {
-  cursor: pointer;
-}
-
-.scores-row.clickable:hover {
-  background: color-mix(in oklab, var(--muted) 30%, transparent);
-}
-
-.scores-cell {
-  padding: 0.75rem;
-}
-
-.scores-cell.event {
-  padding: 0.5rem;
-  text-align: center;
-}
-
-.scores-cell.stats {
-  width: 14rem;
-  background: color-mix(in oklab, var(--muted) 30%, transparent);
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--muted);
+/* Reduce stats column weight */
+.scores-cell.stats,
+.stats-col {
+  width: 160px;
 }
 
 .score-athlete {
@@ -1352,4 +1323,93 @@ html.dark .icon-sun {
     min-height: 300px;
     height: 300px;
   }
+
+  .scores-table {
+    min-width: 720px;
+    font-size: 0.8rem;
+  }
+
+  .scores-table th,
+  .scores-table td {
+    padding: 0.45rem 0.5rem;
+  }
+}
+
+/* =========================
+   FORCE FLUID LAYOUT OVERRIDE
+   ========================= */
+
+main {
+  max-width: 1400px !important;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.page-shell {
+  max-width: 1400px !important;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.scores-table {
+  width: 100%;
+  min-width: 100%;
+}
+
+/* =========================
+   SCORE TOOLTIP: NEVER CLIP
+   ========================= */
+
+/* The scroll container must allow the tooltip to escape vertically */
+.scores-table-wrap,
+.table-wrap {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  position: relative;
+}
+
+/* Ensure table cells don't become clipping contexts */
+.scores-table,
+.scores-table td,
+.scores-table th {
+  overflow: visible !important;
+}
+
+/* The score wrapper must create a reliable positioning + stacking context */
+.score-group,
+.score-cell {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Force tooltip above everything and render UPWARD */
+.score-popover {
+  display: none;
+  pointer-events: none;
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px); /* POP UPWARD */
+  top: auto !important;
+
+  transform: translateX(-50%);
+  z-index: 9999 !important;
+
+  width: 16rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  padding: 0.75rem;
+  text-align: left;
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.22);
+}
+
+/* Show on hover */
+.score-group:hover .score-popover {
+  display: block;
+}
+
+/* Give the section breathing room so last-row popovers aren't cut by page flow */
+.scores-card {
+  padding-bottom: 4rem;
 }

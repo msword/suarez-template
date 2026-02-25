@@ -1,7 +1,7 @@
 {{ $page := .page | default . }}
 {{ $scores := .scores | default ($page.Params.scores | default ($page.Params.scoreHistory | default (slice))) }}
 {{ if gt (len $scores) 0 }}
-  <section class="scores-card">
+  <section class="scores-card ">
     <div class="header-row">
       <h2>Scores</h2>
       <p class="text-muted">Event totals are shown to 3 decimals when provided.</p>
@@ -53,6 +53,7 @@
             {{ $division := lower (printf "%v" (index . "division" | default "")) }}
             {{ $gymnast := index . "gymnast" | default dict }}
             {{ $events := index . "events" | default dict }}
+            {{ $hibar := index $events "hibar" | default (index $events "highbar" | default dict) }}
             {{ $allAround := index . "allAround" | default dict }}
             {{ $meet := index . "meet" | default dict }}
             {{ $name := index $gymnast "name" | default ($page.Title | default "Unknown") }}
@@ -78,16 +79,19 @@
               <td class="scores-cell">{{ index $meet "name" | default (index . "meetName" | default "-") }}</td>
               <td class="scores-cell">{{ index . "session" | default "-" }}</td>
               <td class="scores-cell">{{ $division | upper }}</td>
+
               {{ partial "score_cell.html" (dict "event" (index $events "vault" | default dict) "eventCode" "VT" "eventLabel" "Vault" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "bars" | default dict) "eventCode" "UB" "eventLabel" "Bars" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "beam" | default dict) "eventCode" "BB" "eventLabel" "Beam" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "floor" | default dict) "eventCode" "FX" "eventLabel" "Floor" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+
               {{ partial "score_cell.html" (dict "event" (index $events "floor" | default dict) "eventCode" "FX" "eventLabel" "Floor" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "pommel" | default dict) "eventCode" "PH" "eventLabel" "Pommel" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "rings" | default dict) "eventCode" "SR" "eventLabel" "Rings" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "vault" | default dict) "eventCode" "VT" "eventLabel" "Vault" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
               {{ partial "score_cell.html" (dict "event" (index $events "pbars" | default dict) "eventCode" "PB" "eventLabel" "PBars" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
-              {{ partial "score_cell.html" (dict "event" (index $events "highbar" | default dict) "eventCode" "HB" "eventLabel" "HiBar" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" $hibar "eventCode" "HB" "eventLabel" "HiBar" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+
               <td class="scores-cell event">{{ $aaTotal }}</td>
               <td class="scores-cell stats">
                 {{ $date }}<br>

@@ -1,37 +1,27 @@
-{{ $data := dict }}
-{{ $raw := .RawContent | default "" }}
-{{ $bodyRaw := $raw }}
-
-{{ with .Params }}
-  {{ if reflect.IsMap . }}
-    {{ $data = merge $data . }}
-  {{ end }}
-{{ end }}
-
-{{ $jsonMatches := findRE `(?s)^\s*\{.*\}` $raw 1 }}
-{{ if gt (len $jsonMatches) 0 }}
-  {{ $jsonBlock := index $jsonMatches 0 }}
-  {{ $parsed := $jsonBlock | transform.Unmarshal }}
-  {{ if reflect.IsMap $parsed }}
-    {{ $data = merge $data $parsed }}
-  {{ end }}
-  {{ $bodyRaw = strings.TrimSpace (replace $raw $jsonBlock "" 1) }}
-{{ end }}
-
-{{ $resolvedTitle := index $data "title" | default .Title }}
-{{ $resolvedIntro := index $data "intro" | default (index $data "pageDesc" | default "") }}
-{{ $sections := index $data "homeSections" | default (index $data "contentSections" | default (slice)) }}
-{{ $scores := index $data "scores" | default (index $data "scoreHistory" | default (slice)) }}
-{{ $body := "" }}
-{{ if ne (strings.TrimSpace $bodyRaw) "" }}
-  {{ $body = $bodyRaw | markdownify }}
-{{ end }}
-
-{{ return (dict
-  "data" $data
-  "title" $resolvedTitle
-  "intro" $resolvedIntro
-  "sections" $sections
-  "scores" $scores
-  "body" $body
-) }}
+{{/* layouts/partials/content_model.html */}} {{ $data := dict }} {{ $raw :=
+.RawContent | default "" }} {{ $bodyRaw := $raw }} {{/* If Hugo params exist
+(front matter), merge them (legacy-safe). */}} {{ with .Params }} {{ if
+reflect.IsMap . }} {{ $data = merge $data . }} {{ end }} {{ end }} {{/* Detect a
+JSON object at the very top of the document. */}} {{ $jsonMatches := findRE
+`(?s)^\s*\{.*\}\s*` $raw 1 }} {{ if gt (len $jsonMatches) 0 }} {{ $jsonBlock :=
+index $jsonMatches 0 }} {{/* Make JSON more tolerant: remove trailing commas
+before } or ] */}} {{ $jsonClean := $jsonBlock | replaceRE `,(\s*[}\]])` `$1` }}
+{{/* Unmarshal safely: NEVER hard-fail the build. */}} {{ $try := try
+(transform.Unmarshal $jsonClean) }} {{ if not $try.Err }} {{ $parsed :=
+$try.Value }} {{ if reflect.IsMap $parsed }} {{ $data = merge $data $parsed }}
+{{ end }} {{ end }} {{/* Remaining content after JSON block (if any) */}} {{
+$bodyRaw = strings.TrimSpace (replace $raw $jsonBlock "" 1) }} {{ end }} {{
+$resolvedTitle := index $data "title" | default .Title }} {{ $resolvedIntro :=
+index $data "intro" | default (index $data "pageDesc" | default (index $data
+"subtitle" | default "")) }} {{/* Unified section contract: coaches/home/meets
+share it */}} {{ $sections := index $data "homeSections" | default (index $data
+"contentSections" | default (slice)) }} {{/* Scores can be embedded on meets or
+hydrated gymnast pages */}} {{ $scores := index $data "scores" | default (index
+$data "scoreHistory" | default (slice)) }} {{/* Body resolution: 1) markdown
+after JSON block 2) bodyMarkdown inside JSON (your new canonical) */}} {{ $body
+:= "" }} {{ if ne (strings.TrimSpace $bodyRaw) "" }} {{ $body = $bodyRaw |
+markdownify }} {{ else }} {{ $bm := index $data "bodyMarkdown" | default "" }}
+{{ if ne (strings.TrimSpace (printf "%v" $bm)) "" }} {{ $body = (printf "%v"
+$bm) | markdownify }} {{ end }} {{ end }} {{ return (dict "data" $data "title"
+$resolvedTitle "intro" $resolvedIntro "sections" $sections "scores" $scores
+"body" $body ) }}

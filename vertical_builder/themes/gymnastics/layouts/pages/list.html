@@ -3,28 +3,44 @@
   <h1>{{ .Title | default "Pages" }}</h1>
   <p class="lead">Custom pages, sorted and searchable.</p>
 
-  <div class="controls-row">
+  <div class="controls-row" style="gap:12px;">
     <input id="custom-pages-search" class="scores-search" type="search" placeholder="Search pages">
+    <button id="custom-pages-clear" class="scores-order" type="button">Clear</button>
   </div>
 
   <div class="card-grid" id="custom-pages-grid">
     {{ $pages := where .RegularPages "Draft" false }}
     {{ range $pages.ByDate.Reverse }}
       {{ $model := partial "content_model.html" . }}
-      <article class="card custom-page-card" data-title="{{ lower $model.title }}">
+      {{ $tags := index $model.data "tags" | default (slice) }}
+      {{ $cats := index $model.data "categories" | default (slice) }}
+
+      {{ $tagStr := "" }}
+      {{ range $tags }}{{ $tagStr = printf "%s,%s" $tagStr (lower (printf "%v" .)) }}{{ end }}
+      {{ $catStr := "" }}
+      {{ range $cats }}{{ $catStr = printf "%s,%s" $catStr (lower (printf "%v" .)) }}{{ end }}
+
+      <article
+        class="card custom-page-card"
+        data-title="{{ lower $model.title }}"
+        data-tags="{{ $tagStr }}"
+        data-categories="{{ $catStr }}"
+      >
         <h2><a href="{{ .RelPermalink }}">{{ $model.title }}</a></h2>
         <p>{{ $model.intro | default .Summary }}</p>
-        {{ if .Params.tags }}
+
+        {{ if gt (len $tags) 0 }}
           <p class="custom-taxonomies">
-            {{ range .Params.tags }}
-              <a href="{{ (printf "/tags/%s/" (urlize .)) | relLangURL }}">#{{ . }}</a>
+            {{ range $tags }}
+              <button type="button" class="taxonomy-chip" data-chip-type="tag" data-chip="{{ lower (printf "%v" .) }}">#{{ printf "%v" . }}</button>
             {{ end }}
           </p>
         {{ end }}
-        {{ if .Params.categories }}
+
+        {{ if gt (len $cats) 0 }}
           <p class="custom-taxonomies">
-            {{ range .Params.categories }}
-              <a href="{{ (printf "/categories/%s/" (urlize .)) | relLangURL }}">{{ . }}</a>
+            {{ range $cats }}
+              <button type="button" class="taxonomy-chip" data-chip-type="category" data-chip="{{ lower (printf "%v" .) }}">{{ printf "%v" . }}</button>
             {{ end }}
           </p>
         {{ end }}
@@ -36,14 +52,57 @@
 <script>
   (function () {
     const input = document.getElementById("custom-pages-search");
+    const clearBtn = document.getElementById("custom-pages-clear");
     const cards = Array.from(document.querySelectorAll(".custom-page-card"));
-    if (!input) return;
-    input.addEventListener("input", function () {
-      const query = input.value.trim().toLowerCase();
+    const chips = Array.from(document.querySelectorAll(".taxonomy-chip"));
+
+    let activeTag = "";
+    let activeCategory = "";
+
+    const apply = function () {
+      const query = (input?.value || "").trim().toLowerCase();
+
       cards.forEach((card) => {
-        card.hidden = query !== "" && !(card.dataset.title || "").includes(query);
+        const title = (card.dataset.title || "");
+        const tags = (card.dataset.tags || "");
+        const cats = (card.dataset.categories || "");
+
+        const matchesQuery = query === "" || title.includes(query);
+        const matchesTag = activeTag === "" || tags.includes("," + activeTag);
+        const matchesCat = activeCategory === "" || cats.includes("," + activeCategory);
+
+        card.hidden = !(matchesQuery && matchesTag && matchesCat);
+      });
+    };
+
+    chips.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const type = btn.dataset.chipType;
+        const value = btn.dataset.chip || "";
+        if (type === "tag") activeTag = (activeTag === value) ? "" : value;
+        if (type === "category") activeCategory = (activeCategory === value) ? "" : value;
+
+        chips.forEach((c) => {
+          const isOn =
+            (c.dataset.chipType === "tag" && c.dataset.chip === activeTag) ||
+            (c.dataset.chipType === "category" && c.dataset.chip === activeCategory);
+          c.classList.toggle("is-active", isOn);
+        });
+
+        apply();
       });
     });
+
+    input?.addEventListener("input", apply);
+    clearBtn?.addEventListener("click", function () {
+      activeTag = "";
+      activeCategory = "";
+      if (input) input.value = "";
+      chips.forEach((c) => c.classList.remove("is-active"));
+      apply();
+    });
+
+    apply();
   })();
 </script>
 {{ end }}
