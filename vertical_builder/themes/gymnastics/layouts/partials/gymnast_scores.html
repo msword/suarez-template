@@ -1,7 +1,7 @@
 {{ $page := .page | default . }}
 {{ $scores := .scores | default ($page.Params.scores | default ($page.Params.scoreHistory | default (slice))) }}
 {{ if gt (len $scores) 0 }}
-  <section class="scores-card ">
+  <section class="">
     <div class="header-row">
       <h2>Scores</h2>
       <p class="text-muted">Event totals are shown to 3 decimals when provided.</p>
