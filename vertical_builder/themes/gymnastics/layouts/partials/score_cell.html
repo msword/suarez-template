@@ -1,0 +1,52 @@
+{{ $event := .event | default dict }}
+{{ $eventCode := .eventCode | default "" }}
+{{ $eventLabel := .eventLabel | default "" }}
+{{ $gymnastName := .gymnastName | default "Athlete" }}
+{{ $meetName := .meetName | default "-" }}
+{{ $value := index $event "total" | default "—" }}
+{{ $placement := index $event "placement" | default 0 }}
+{{ $difficulty := index $event "difficulty" | default "—" }}
+{{ $execution := index $event "execution" | default "—" }}
+{{ $rankClass := "rank-4plus" }}
+{{ if eq $placement 1 }}{{ $rankClass = "rank-1" }}{{ end }}
+{{ if eq $placement 2 }}{{ $rankClass = "rank-2" }}{{ end }}
+{{ if eq $placement 3 }}{{ $rankClass = "rank-3" }}{{ end }}
+
+<td class="scores-cell event">
+  {{ if ne (printf "%v" $value) "—" }}
+    <div class="score-group">
+      <div class="score-chip">
+        <span class="score-value">{{ $value }}</span>
+        {{ if gt (int $placement) 0 }}
+          <span class="rank-badge {{ $rankClass }}">{{ $placement }}</span>
+        {{ end }}
+      </div>
+      <div class="score-popover">
+        <div class="score-popover-head">
+          <div class="score-popover-avatar">{{ substr $gymnastName 0 1 | upper }}</div>
+          <div class="score-popover-meta">
+            <p class="score-popover-name">{{ $gymnastName }}</p>
+            <p class="score-popover-meet">{{ $meetName }}</p>
+          </div>
+        </div>
+        <div class="score-popover-event">
+          <span class="score-popover-code">{{ $eventCode }}</span>
+          <span class="score-popover-label">{{ $eventLabel }}</span>
+          <span class="score-popover-total">{{ $value }}</span>
+        </div>
+        <div class="score-popover-grid">
+          <div>
+            <p>Difficulty</p>
+            <p class="score-popover-em">{{ $difficulty }}</p>
+          </div>
+          <div>
+            <p>Execution</p>
+            <p class="score-popover-em">{{ $execution }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{ else }}
+    —
+  {{ end }}
+</td>

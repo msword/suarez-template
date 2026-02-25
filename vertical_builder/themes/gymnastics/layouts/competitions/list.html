@@ -1,0 +1,25 @@
+{{ define "main" }}
+<section class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  <p class="lead">Season competition archive.</p>
+  <div class="card-grid">
+    {{ $pages := where .RegularPages "Draft" false }}
+    {{ if gt (len $pages) 0 }}
+      {{ range sort $pages "Title" "desc" }}
+        {{ $status := .Params.status | default "active" }}
+        {{ if eq $status "active" }}
+        <article class="card">
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          {{ with .Summary }}<p>{{ . }}</p>{{ end }}
+        </article>
+        {{ end }}
+      {{ end }}
+    {{ else }}
+      <article class="card">
+        <h2>No competitions published yet</h2>
+        <p>Add markdown files under <code>content/competitions/</code> to populate this page.</p>
+      </article>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

@@ -1,0 +1,94 @@
+{{ define "main" }}
+{{ $data := partial "data_bundle.html" . }}
+{{ $monthSource := .Params.month | default (now.Format "2006-01") }}
+{{ $monthDate := time (printf "%s-01" $monthSource) }}
+{{ $nextMonthDate := $monthDate.AddDate 0 1 0 }}
+{{ $prevMonthDate := $monthDate.AddDate 0 -1 0 }}
+{{ $monthLabel := dateFormat "January 2006" $monthDate }}
+{{ $daysInMonth := int (dateFormat "2" ($nextMonthDate.AddDate 0 0 -1)) }}
+{{ $weekdays := slice "Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" }}
+{{ $weekdayIndex := dict "Sun" 0 "Mon" 1 "Tue" 2 "Wed" 3 "Thu" 4 "Fri" 5 "Sat" 6 }}
+{{ $offset := index $weekdayIndex (dateFormat "Mon" $monthDate) }}
+{{ $prevMonthDays := int (dateFormat "2" ($monthDate.AddDate 0 0 -1)) }}
+
+{{ $events := $data.calendar.events | default (slice) }}
+{{ $filteredEvents := slice }}
+{{ range $events }}
+  {{ $status := lower (printf "%v" (index . "status")) }}
+  {{ if and (ne $status "cancelled") (ne $status "canceled") }}
+    {{ $filteredEvents = $filteredEvents | append . }}
+  {{ end }}
+{{ end }}
+
+<section>
+  <h1>BuzzPoint Events</h1>
+  <div class="calendar-controls">
+    <a class="control-link" href="{{ .RelPermalink }}?month={{ dateFormat "2006-01" $prevMonthDate }}">Previous</a>
+    <p>{{ $monthLabel }}</p>
+    <a class="control-link" href="{{ .RelPermalink }}?month={{ dateFormat "2006-01" $nextMonthDate }}">Next</a>
+  </div>
+
+  <div class="calendar-grid" role="grid" aria-label="{{ $monthLabel }}">
+    {{ range $weekdays }}
+      <div class="calendar-weekday" role="columnheader">{{ . }}</div>
+    {{ end }}
+
+    {{ range $cell := seq 0 41 }}
+      {{ $dayNumber := sub (add $cell 1) $offset }}
+      {{ $inMonth := and (ge $dayNumber 1) (le $dayNumber $daysInMonth) }}
+      {{ $cellClass := "calendar-day" }}
+      {{ if not $inMonth }}{{ $cellClass = printf "%s is-out-month" $cellClass }}{{ end }}
+
+      <div class="{{ $cellClass }}" role="gridcell">
+        <p class="calendar-day-number">
+          {{ if $inMonth }}{{ $dayNumber }}{{ else }}{{ if lt $dayNumber 1 }}{{ add $prevMonthDays $dayNumber }}{{ else }}{{ sub $dayNumber $daysInMonth }}{{ end }}{{ end }}
+        </p>
+
+        {{ if $inMonth }}
+          {{ $dateKey := dateFormat "2006-01-02" (time (printf "%s-%02d" $monthSource $dayNumber)) }}
+          {{ $dayEvents := slice }}
+          {{ range $filteredEvents }}
+            {{ $startAt := index . "start_at" }}
+            {{ if and $startAt (eq (dateFormat "2006-01-02" (time $startAt)) $dateKey) }}
+              {{ $dayEvents = $dayEvents | append . }}
+            {{ end }}
+          {{ end }}
+
+          {{ if gt (len $dayEvents) 0 }}
+            {{ $visibleCount := 2 }}
+            {{ if lt (len $dayEvents) 2 }}{{ $visibleCount = len $dayEvents }}{{ end }}
+            {{ range first $visibleCount (sort $dayEvents "start_at") }}
+              {{ $eventID := index . "id" | default "" }}
+              {{ $eventURL := printf "%s%s/" $.RelPermalink $eventID }}
+              <div class="calendar-event-wrap">
+                <a href="{{ $eventURL }}" class="calendar-event-pill">{{ index . "title" }}</a>
+                <div class="calendar-event-tooltip" role="tooltip">
+                  <p class="calendar-event-tooltip-title">{{ index . "title" }}</p>
+                  <p class="calendar-event-tooltip-text">{{ index . "description" | default "" }}</p>
+                  <p class="calendar-event-tooltip-meta">{{ index . "location" | default "" }}</p>
+                  {{ if index . "all_day" }}
+                    <p class="calendar-event-tooltip-meta">All day</p>
+                  {{ else }}
+                    <p class="calendar-event-tooltip-meta">{{ index . "start_at" | default "" }}{{ with index . "end_at" }} - {{ . }}{{ end }}</p>
+                  {{ end }}
+                  <a class="calendar-event-tooltip-link" href="{{ $eventURL }}">View event details</a>
+                </div>
+              </div>
+            {{ end }}
+            {{ if gt (len $dayEvents) 2 }}
+              <p class="event-more">+{{ sub (len $dayEvents) 2 }} more</p>
+            {{ end }}
+          {{ end }}
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+
+  {{ if eq (len $filteredEvents) 0 }}
+    <section class="empty-state">
+      <h2>No events scheduled yet</h2>
+      <p>This month is currently empty.</p>
+    </section>
+  {{ end }}
+</section>
+{{ end }}

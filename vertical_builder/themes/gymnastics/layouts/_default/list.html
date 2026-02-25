@@ -1,0 +1,19 @@
+{{ define "main" }}
+<section class="wrap page-shell">
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+
+  <div class="card-grid">
+    {{ $pages := where .RegularPages "Draft" false }}
+    {{ range $pages }}
+      {{ $status := .Params.status | default "active" }}
+      {{ if eq $status "active" }}
+      <article class="card">
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        {{ with .Summary }}<p>{{ . }}</p>{{ end }}
+      </article>
+      {{ end }}
+    {{ end }}
+  </div>
+</section>
+{{ end }}

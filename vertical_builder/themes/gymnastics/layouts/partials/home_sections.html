@@ -1,0 +1,47 @@
+{{ $sections := .sections | default (slice) }}
+{{ $active := slice }}
+{{ range $sections }}
+  {{ if or (not (isset . "active")) (index . "active") }}
+    {{ $active = $active | append . }}
+  {{ end }}
+{{ end }}
+
+{{ range sort $active "order" "asc" }}
+  {{ $title := index . "title" | default "" }}
+  {{ $subtitle := index . "subtitle" | default "" }}
+  {{ $body := index . "bodyMarkdown" | default "" }}
+  {{ $ctaLabel := index . "ctaLabel" | default "" }}
+  {{ $ctaUrl := index . "ctaUrl" | default "" }}
+  {{ $image := index . "imageUrl" | default (index . "mediaUrl" | default "") }}
+  {{ $side := upper (printf "%v" (index . "side" | default "R")) }}
+  {{ $layout := "section-right-media" }}
+  {{ if eq $side "L" }}{{ $layout = "section-left-media" }}{{ end }}
+  <section class="section-block {{ $layout }}">
+    <div class="section-copy">
+      {{ with $title }}<h2>{{ . }}</h2>{{ end }}
+      {{ with $subtitle }}<p class="subtitle">{{ . }}</p>{{ end }}
+      {{ with $body }}<div class="broadcast-body">{{ . | markdownify }}</div>{{ end }}
+      {{ if and (ne $ctaLabel "") (ne $ctaUrl "") }}
+        <p><a class="nav-link" href="{{ $ctaUrl }}">{{ $ctaLabel }}</a></p>
+      {{ end }}
+    </div>
+
+    <div class="section-media">
+      {{ if ne $image "" }}
+        <img src="{{ $image }}" alt="{{ $title }}" class="section-image" loading="lazy" decoding="async">
+      {{ else }}
+        <div class="section-image-missing" role="status" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.41 10.41a2 2 0 1 1 2.83 2.83" />
+            <path d="M13.5 13.5 6 21" />
+            <path d="M18 18H5a2 2 0 0 1-2-2V6" />
+            <path d="m2 2 20 20" />
+            <path d="M21 15V8a2 2 0 0 0-2-2h-7" />
+            <path d="M8 21h10a2 2 0 0 0 2-2v-1" />
+          </svg>
+          <p>Image missing for this section. Add an `imageUrl` to display media.</p>
+        </div>
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

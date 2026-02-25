@@ -1,0 +1,16 @@
+{
+  "jobId": "vb_856f1b68a06b",
+  "env": "sword",
+  "orgId": "matthew-sword",
+  "verticalKey": "gymnastics",
+  "templateKey": "gymnastics",
+  "exportId": "20260225T134240Z",
+  "buildTarget": { "hostingProject": "bap-broadcast", "site": "matthew-sword" }
+}
+
+
+PAYLOAD='{"jobId":"vb_856f1b68a06b","env":"sword","orgId":"matthew-sword","verticalKey":"gymnastics","templateKey":"gymnastics","exportId":"20260225T134240Z","buildTarget":{"hostingProject":"bap-broadcast","site":"matthew-sword"}}'
+
+curl -X POST "http://localhost:8081/modules/vertical-builder" \
+  -H "Content-Type: application/json" \
+  -d "{\"message\":{\"data\":\"$(printf '%s' "$PAYLOAD" | base64)\"}}"

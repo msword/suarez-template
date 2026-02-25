@@ -1,0 +1,131 @@
+{{ define "main" }}
+{{ $model := partial "content_model.html" . }}
+{{ $data := $model.data }}
+{{ $scores := $model.scores }}
+<article class="page-shell meet-detail-page">
+  <h1>{{ $model.title }}</h1>
+  <ul class="meta-list">
+    {{ with index $data "location" }}<li>Location: {{ . }}</li>{{ end }}
+    {{ with (index $data "startDate" | default (index $data "date" | default "")) }}<li>Start Date: {{ . }}</li>{{ end }}
+    {{ with index $data "endDate" }}<li>End Date: {{ . }}</li>{{ end }}
+  </ul>
+
+  {{ if gt (len $model.sections) 0 }}
+    {{ partial "home_sections.html" (dict "sections" $model.sections) }}
+  {{ end }}
+
+  {{ if gt (len $scores) 0 }}
+    {{ $levelSet := dict }}
+    {{ $levels := slice }}
+    {{ range $scores }}
+      {{ $level := printf "%v" (index . "level" | default "-") }}
+      {{ if not (isset $levelSet $level) }}
+        {{ $levelSet = merge $levelSet (dict $level true) }}
+        {{ $levels = $levels | append $level }}
+      {{ end }}
+    {{ end }}
+    {{ $levels = sort $levels }}
+    {{ $half := div (add (len $levels) 1) 2 }}
+    <section class="meet-summary">
+      <h2>Level Summary</h2>
+      <div class="meet-summary-grid">
+        <ul>
+          {{ range first $half $levels }}
+            <li>Level {{ . }}</li>
+          {{ end }}
+        </ul>
+        <ul>
+          {{ range after $half $levels }}
+            <li>Level {{ . }}</li>
+          {{ end }}
+        </ul>
+      </div>
+    </section>
+
+    <section class="meet-scores-section">
+      <div class="controls-row">
+        <input id="meet-filter-gymnast" class="scores-search" type="search" placeholder="Filter by gymnast">
+        <select id="meet-filter-level" class="scores-sort">
+          <option value="all">All levels</option>
+          {{ range $levels }}
+            <option value="{{ . }}">Level {{ . }}</option>
+          {{ end }}
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table class="scores-table" id="meet-scores-table">
+          <thead>
+            <tr>
+              <th>Gymnast</th>
+              <th>Level</th>
+              <th>Session</th>
+              <th>Division</th>
+              <th>Floor</th>
+              <th>Pommel</th>
+              <th>Rings</th>
+              <th>Vault</th>
+              <th>PBars</th>
+              <th>HiBar</th>
+              <th>Bars</th>
+              <th>Beam</th>
+              <th>AA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $scores }}
+              {{ $gymnast := index . "gymnast" | default dict }}
+              {{ $events := index . "events" | default dict }}
+              {{ $name := index $gymnast "name" | default "Unknown" }}
+              {{ $level := printf "%v" (index . "level" | default "-") }}
+              <tr data-name="{{ lower $name }}" data-level="{{ $level }}">
+                <td>{{ $name }}</td>
+                <td>{{ $level }}</td>
+                <td>{{ index . "session" | default "-" }}</td>
+                <td>{{ index . "division" | default "-" }}</td>
+                <td>{{ index (index $events "floor" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "pommel" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "rings" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "vault" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "pbars" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "highbar" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "bars" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index $events "beam" | default dict) "total" | default "—" }}</td>
+                <td>{{ index (index . "allAround" | default dict) "total" | default "—" }}</td>
+              </tr>
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {{ end }}
+
+  <div class="prose">{{ $model.body }}</div>
+</article>
+
+<script>
+  (function () {
+    const table = document.getElementById("meet-scores-table");
+    if (!table) return;
+    const gymnastInput = document.getElementById("meet-filter-gymnast");
+    const levelSelect = document.getElementById("meet-filter-level");
+    const rows = Array.from(table.querySelectorAll("tbody tr"));
+
+    const applyFilters = function () {
+      const nameQuery = (gymnastInput?.value || "").trim().toLowerCase();
+      const level = levelSelect?.value || "all";
+      rows.forEach((row) => {
+        const name = row.dataset.name || "";
+        const rowLevel = row.dataset.level || "";
+        const matchesName = nameQuery === "" || name.includes(nameQuery);
+        const matchesLevel = level === "all" || rowLevel === level;
+        row.hidden = !(matchesName && matchesLevel);
+      });
+    };
+
+    gymnastInput?.addEventListener("input", applyFilters);
+    levelSelect?.addEventListener("change", applyFilters);
+    applyFilters();
+  })();
+</script>
+{{ end }}

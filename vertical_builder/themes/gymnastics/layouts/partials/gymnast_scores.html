@@ -1,0 +1,169 @@
+{{ $page := .page | default . }}
+{{ $scores := .scores | default ($page.Params.scores | default ($page.Params.scoreHistory | default (slice))) }}
+{{ if gt (len $scores) 0 }}
+  <section class="scores-card">
+    <div class="header-row">
+      <h2>Scores</h2>
+      <p class="text-muted">Event totals are shown to 3 decimals when provided.</p>
+    </div>
+
+    <div class="controls-row">
+      <div class="division-toggle" role="group" aria-label="Division">
+        <button class="division-btn is-active" type="button" data-division="all">All</button>
+        <button class="division-btn" type="button" data-division="wag">Women</button>
+        <button class="division-btn" type="button" data-division="mag">Men</button>
+      </div>
+
+      <input class="scores-search" id="scores-search" type="search" placeholder="Search gymnast">
+      <select class="scores-sort" id="scores-sort">
+        <option value="date">Sort: Date</option>
+        <option value="name">Sort: Gymnast</option>
+        <option value="level">Sort: Level</option>
+        <option value="aa">Sort: All-Around</option>
+      </select>
+      <button class="scores-order" id="scores-order" type="button" data-order="desc">Newest first</button>
+      <button class="scores-new" type="button" disabled>Add score</button>
+    </div>
+
+    <div class="scores-table-wrap">
+      <table class="scores-table" id="scores-table">
+        <thead class="bg-muted text-left text-muted-foreground">
+          <tr>
+            <th class="p-3">Gymnast</th>
+            <th class="p-3">Level</th>
+            <th class="p-3">Meet</th>
+            <th class="p-3">Session</th>
+            <th class="p-3">Division</th>
+            <th class="p-3 text-center event-women">Vault</th>
+            <th class="p-3 text-center event-women">Bars</th>
+            <th class="p-3 text-center event-women">Beam</th>
+            <th class="p-3 text-center event-women">Floor</th>
+            <th class="p-3 text-center event-men">Floor</th>
+            <th class="p-3 text-center event-men">Pommel</th>
+            <th class="p-3 text-center event-men">Rings</th>
+            <th class="p-3 text-center event-men">Vault</th>
+            <th class="p-3 text-center event-men">PBars</th>
+            <th class="p-3 text-center event-men">HiBar</th>
+            <th class="p-3 text-center">AA</th>
+            <th class="p-3 stats-col">Stats</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range $scores }}
+            {{ $division := lower (printf "%v" (index . "division" | default "")) }}
+            {{ $gymnast := index . "gymnast" | default dict }}
+            {{ $events := index . "events" | default dict }}
+            {{ $allAround := index . "allAround" | default dict }}
+            {{ $meet := index . "meet" | default dict }}
+            {{ $name := index $gymnast "name" | default ($page.Title | default "Unknown") }}
+            {{ $date := index . "createdAt" | default (index $meet "startDate" | default "") }}
+            {{ $level := index . "level" | default (index $gymnast "level" | default "-") }}
+            {{ $aaTotal := index $allAround "total" | default "-" }}
+            <tr
+              class="scores-row clickable"
+              tabindex="0"
+              data-division="{{ $division }}"
+              data-name="{{ lower (printf "%v" $name) }}"
+              data-level="{{ printf "%v" $level }}"
+              data-aa="{{ printf "%v" $aaTotal }}"
+              data-date="{{ printf "%v" $date }}"
+            >
+              <td class="scores-cell">
+                <div class="score-athlete">
+                  <div class="score-athlete-avatar">{{ substr $name 0 1 | upper }}</div>
+                  <span class="score-athlete-name">{{ $name }}</span>
+                </div>
+              </td>
+              <td class="scores-cell">{{ $level }}</td>
+              <td class="scores-cell">{{ index $meet "name" | default (index . "meetName" | default "-") }}</td>
+              <td class="scores-cell">{{ index . "session" | default "-" }}</td>
+              <td class="scores-cell">{{ $division | upper }}</td>
+              {{ partial "score_cell.html" (dict "event" (index $events "vault" | default dict) "eventCode" "VT" "eventLabel" "Vault" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "bars" | default dict) "eventCode" "UB" "eventLabel" "Bars" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "beam" | default dict) "eventCode" "BB" "eventLabel" "Beam" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "floor" | default dict) "eventCode" "FX" "eventLabel" "Floor" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "floor" | default dict) "eventCode" "FX" "eventLabel" "Floor" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "pommel" | default dict) "eventCode" "PH" "eventLabel" "Pommel" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "rings" | default dict) "eventCode" "SR" "eventLabel" "Rings" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "vault" | default dict) "eventCode" "VT" "eventLabel" "Vault" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "pbars" | default dict) "eventCode" "PB" "eventLabel" "PBars" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              {{ partial "score_cell.html" (dict "event" (index $events "highbar" | default dict) "eventCode" "HB" "eventLabel" "HiBar" "gymnastName" $name "meetName" (index $meet "name" | default "-")) }}
+              <td class="scores-cell event">{{ $aaTotal }}</td>
+              <td class="scores-cell stats">
+                {{ $date }}<br>
+                {{ with index . "clubName" }}{{ . }}{{ else }}—{{ end }}
+              </td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const table = document.getElementById("scores-table");
+      if (!table) return;
+      const body = table.querySelector("tbody");
+      const search = document.getElementById("scores-search");
+      const sort = document.getElementById("scores-sort");
+      const order = document.getElementById("scores-order");
+      const divisionButtons = Array.from(document.querySelectorAll(".division-btn"));
+      let activeDivision = "all";
+
+      const setDivision = function (value) {
+        activeDivision = value;
+        divisionButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.division === value));
+        const showWomen = value === "all" || value === "wag";
+        const showMen = value === "all" || value === "mag";
+        table.querySelectorAll(".event-women").forEach((el) => { el.style.display = showWomen ? "" : "none"; });
+        table.querySelectorAll(".event-men").forEach((el) => { el.style.display = showMen ? "" : "none"; });
+        applyFilters();
+      };
+
+      divisionButtons.forEach((btn) => {
+        btn.addEventListener("click", function () {
+          setDivision(btn.dataset.division);
+        });
+      });
+
+      const applyFilters = function () {
+        const rows = Array.from(body.querySelectorAll("tr"));
+        const query = (search?.value || "").trim().toLowerCase();
+        rows.forEach((row) => {
+          const div = row.dataset.division || "";
+          const name = row.dataset.name || "";
+          const matchesDivision = activeDivision === "all" || div === activeDivision;
+          const matchesQuery = query === "" || name.includes(query);
+          row.hidden = !(matchesDivision && matchesQuery);
+        });
+      };
+
+      const sortRows = function () {
+        const rows = Array.from(body.querySelectorAll("tr"));
+        const key = sort?.value || "date";
+        const direction = order?.dataset.order === "asc" ? 1 : -1;
+        rows.sort((a, b) => {
+          if (key === "level") return (Number(a.dataset.level || 0) - Number(b.dataset.level || 0)) * direction;
+          if (key === "aa") return (Number(a.dataset.aa || 0) - Number(b.dataset.aa || 0)) * direction;
+          if (key === "name") return (a.dataset.name || "").localeCompare(b.dataset.name || "") * direction;
+          return (a.dataset.date || "").localeCompare(b.dataset.date || "") * direction;
+        });
+        rows.forEach((row) => body.appendChild(row));
+        applyFilters();
+      };
+
+      search?.addEventListener("input", applyFilters);
+      sort?.addEventListener("change", sortRows);
+      order?.addEventListener("click", function () {
+        const current = order.dataset.order || "desc";
+        order.dataset.order = current === "desc" ? "asc" : "desc";
+        order.textContent = order.dataset.order === "desc" ? "Newest first" : "Oldest first";
+        sortRows();
+      });
+
+      setDivision("all");
+      sortRows();
+    })();
+  </script>
+{{ end }}

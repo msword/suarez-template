@@ -1,0 +1,59 @@
+{{ define "main" }}
+{{ $data := partial "data_bundle.html" . }}
+{{ $eventID := .File.ContentBaseName }}
+{{ $events := $data.calendar.events | default (slice) }}
+
+{{ $event := dict }}
+{{ range $events }}
+  {{ if eq (printf "%v" (index . "id")) $eventID }}
+    {{ $event = . }}
+  {{ end }}
+{{ end }}
+
+<section>
+  <h1>{{ if gt (len $event) 0 }}{{ index $event "title" }}{{ else }}{{ .Title }}{{ end }}</h1>
+  <dl>
+    <dt>Schedule</dt>
+    <dd>
+      {{ if gt (len $event) 0 }}
+        {{ if index $event "all_day" }}All day{{ else }}{{ index $event "start_at" | default "" }}{{ with index $event "end_at" }} to {{ . }}{{ end }}{{ end }}
+      {{ else }}
+        {{ with .Params.start_at }}{{ . }}{{ end }}{{ with .Params.end_at }} to {{ . }}{{ end }}
+      {{ end }}
+    </dd>
+    <dt>Location</dt>
+    <dd>{{ if gt (len $event) 0 }}{{ index $event "location" | default "" }}{{ else }}{{ .Params.location | default "" }}{{ end }}</dd>
+  </dl>
+
+  {{ $linked := slice }}
+  {{ if gt (len $event) 0 }}{{ with index $event "linkedBroadcasts" }}{{ $linked = . }}{{ end }}{{ end }}
+  {{ with .Params.linkedBroadcasts }}{{ $linked = . }}{{ end }}
+
+  {{ $webMatches := slice }}
+  {{ range $linked }}
+    {{ $channels := index . "channels" | default (slice) }}
+    {{ if in $channels "web" }}{{ $webMatches = $webMatches | append . }}{{ end }}
+  {{ end }}
+
+  {{ $selected := dict }}
+  {{ $byUpdated := sort (where $webMatches "updatedAt" "!=" nil) "updatedAt" "desc" }}
+  {{ if gt (len $byUpdated) 0 }}
+    {{ $selected = index $byUpdated 0 }}
+  {{ else }}
+    {{ $byCreated := sort (where $webMatches "createdAt" "!=" nil) "createdAt" "desc" }}
+    {{ if gt (len $byCreated) 0 }}{{ $selected = index $byCreated 0 }}{{ end }}
+  {{ end }}
+
+  {{ if gt (len $selected) 0 }}
+    <section>
+      <h2>Linked Web Content</h2>
+      <div>{{ index $selected "webContent" | default "" }}</div>
+    </section>
+  {{ else }}
+    <section class="empty-state">
+      <h2>No web content linked</h2>
+      <p></p>
+    </section>
+  {{ end }}
+</section>
+{{ end }}

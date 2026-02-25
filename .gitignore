@@ -12,4 +12,13 @@
 
 # macOS / editor noise
 .DS_Store
+
+vertical_builder/workspaces/
+public/
 .vscode/*.log
+vertical_builder/themes/gymnastics/static/images/logo.jpg
+vertical_builder/themes/gymnastics/static/images/coaches/coachCS.jpg
+vertical_builder/themes/gymnastics/static/images/coaches/coachJH.jpg
+vertical_builder/themes/gymnastics/static/images/coaches/coachJN.jpg
+vertical_builder/themes/gymnastics/static/images/coaches/coachLS.jpg
+vertical_builder/themes/gymnastics/static/images/coaches/cropTeam.jpg

@@ -1,0 +1,49 @@
+{{ define "main" }}
+<section class="page-shell pages-list-page">
+  <h1>{{ .Title | default "Pages" }}</h1>
+  <p class="lead">Custom pages, sorted and searchable.</p>
+
+  <div class="controls-row">
+    <input id="custom-pages-search" class="scores-search" type="search" placeholder="Search pages">
+  </div>
+
+  <div class="card-grid" id="custom-pages-grid">
+    {{ $pages := where .RegularPages "Draft" false }}
+    {{ range $pages.ByDate.Reverse }}
+      {{ $model := partial "content_model.html" . }}
+      <article class="card custom-page-card" data-title="{{ lower $model.title }}">
+        <h2><a href="{{ .RelPermalink }}">{{ $model.title }}</a></h2>
+        <p>{{ $model.intro | default .Summary }}</p>
+        {{ if .Params.tags }}
+          <p class="custom-taxonomies">
+            {{ range .Params.tags }}
+              <a href="{{ (printf "/tags/%s/" (urlize .)) | relLangURL }}">#{{ . }}</a>
+            {{ end }}
+          </p>
+        {{ end }}
+        {{ if .Params.categories }}
+          <p class="custom-taxonomies">
+            {{ range .Params.categories }}
+              <a href="{{ (printf "/categories/%s/" (urlize .)) | relLangURL }}">{{ . }}</a>
+            {{ end }}
+          </p>
+        {{ end }}
+      </article>
+    {{ end }}
+  </div>
+</section>
+
+<script>
+  (function () {
+    const input = document.getElementById("custom-pages-search");
+    const cards = Array.from(document.querySelectorAll(".custom-page-card"));
+    if (!input) return;
+    input.addEventListener("input", function () {
+      const query = input.value.trim().toLowerCase();
+      cards.forEach((card) => {
+        card.hidden = query !== "" && !(card.dataset.title || "").includes(query);
+      });
+    });
+  })();
+</script>
+{{ end }}

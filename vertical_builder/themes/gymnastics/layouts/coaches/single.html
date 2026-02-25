@@ -1,0 +1,35 @@
+{{ define "main" }}
+{{ $model := partial "content_model.html" . }}
+{{ $data := $model.data }}
+<article class="page-shell coach-detail-page">
+  {{ $photo := index $data "profileImage" | default (index $data "photo" | default (index $data "photoUrl" | default (index $data "imageUrl" | default (index $data "image" | default "")))) }}
+  {{ $intro := $model.intro }}
+  {{ $sections := $model.sections }}
+  <header class="coach-detail-header">
+    <div class="coach-avatar coach-detail-avatar">
+      {{ if ne ($photo | default "") "" }}
+        <img src="{{ $photo }}" alt="{{ $model.title }} profile photo" loading="lazy" decoding="async">
+      {{ else }}
+        {{ $parts := split $model.title " " }}
+        {{ $initials := "" }}
+        {{ range first 2 $parts }}
+          {{ if gt (len .) 0 }}
+            {{ $initials = printf "%s%s" $initials (upper (substr . 0 1)) }}
+          {{ end }}
+        {{ end }}
+        <span class="coach-avatar-fallback" aria-hidden="true">{{ $initials }}</span>
+      {{ end }}
+    </div>
+    <div class="coach-detail-title-wrap">
+      <h1 class="coach-detail-title">{{ $model.title }}</h1>
+      {{ with $intro }}<p class="coach-detail-subtitle">{{ . }}</p>{{ end }}
+    </div>
+  </header>
+
+  {{ if gt (len $sections) 0 }}
+    {{ partial "home_sections.html" (dict "sections" $sections) }}
+  {{ else }}
+    <div class="prose">{{ $model.body }}</div>
+  {{ end }}
+</article>
+{{ end }}

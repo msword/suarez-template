@@ -1,0 +1,35 @@
+{{ define "main" }}
+<section class="page-shell meets-list-page">
+  <h1>{{ .Title }}</h1>
+  <p class="lead">Meet calendar grouped by year and sorted by start date.</p>
+
+  {{ $active := slice }}
+  {{ range where .RegularPages "Draft" false }}
+    {{ $model := partial "content_model.html" . }}
+    {{ $status := index $model.data "status" | default "active" }}
+    {{ if eq $status "active" }}
+      {{ $active = $active | append . }}
+    {{ end }}
+  {{ end }}
+  {{ $sorted := sort $active "Date" "desc" }}
+
+  {{ $currentYear := "" }}
+  {{ range $sorted }}
+    {{ $model := partial "content_model.html" . }}
+    {{ $start := index $model.data "startDate" | default (index $model.data "date" | default "") }}
+    {{ $year := index $model.data "year" | default (dateFormat "2006" $start) }}
+
+    {{ if ne $year $currentYear }}
+      {{ if ne $currentYear "" }}<hr class="year-divider">{{ end }}
+      <h2 class="year-heading">{{ $year }}</h2>
+      {{ $currentYear = $year }}
+    {{ end }}
+
+    <article class="meet-row-card">
+      <h3><a href="{{ .RelPermalink }}">{{ $model.title }}</a></h3>
+      <p>{{ index $model.data "location" | default "Location TBD" }}</p>
+      <p>{{ $start }}</p>
+    </article>
+  {{ end }}
+</section>
+{{ end }}

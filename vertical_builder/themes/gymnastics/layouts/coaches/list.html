@@ -1,0 +1,40 @@
+{{ define "main" }}
+<section class="page-shell coaches-page">
+  <h1>{{ .Title }}</h1>
+  <p class="lead">Leadership and coaching staff.</p>
+  <div class="coaches-grid">
+    {{ $pages := where .RegularPages "Draft" false }}
+    {{ $pages = sort $pages "Params.displayOrder" "asc" }}
+    {{ range $pages }}
+      {{ $model := partial "content_model.html" . }}
+      {{ $data := $model.data }}
+      {{ $status := .Params.status | default "active" }}
+      {{ if eq $status "active" }}
+      {{ $photo := index $data "profileImage" | default (index $data "photo" | default (index $data "photoUrl" | default (index $data "imageUrl" | default (index $data "image" | default "")))) }}
+      <article class="coach-card">
+        <a class="coach-card-link" href="{{ .RelPermalink }}">
+          <div class="coach-avatar">
+            {{ if ne ($photo | default "") "" }}
+              <img src="{{ $photo }}" alt="{{ $model.title }} profile photo" loading="lazy" decoding="async">
+            {{ else }}
+              {{ $parts := split $model.title " " }}
+              {{ $initials := "" }}
+              {{ range first 2 $parts }}
+                {{ if gt (len .) 0 }}
+                  {{ $initials = printf "%s%s" $initials (upper (substr . 0 1)) }}
+                {{ end }}
+              {{ end }}
+              <span class="coach-avatar-fallback" aria-hidden="true">{{ $initials }}</span>
+            {{ end }}
+          </div>
+          <div class="coach-copy">
+            <h2>{{ $model.title }}</h2>
+            <p>{{ $model.intro | default "Coach profile" }}</p>
+          </div>
+        </a>
+      </article>
+      {{ end }}
+    {{ end }}
+  </div>
+</section>
+{{ end }}

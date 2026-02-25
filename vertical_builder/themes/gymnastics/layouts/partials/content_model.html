@@ -1,0 +1,37 @@
+{{ $data := dict }}
+{{ $raw := .RawContent | default "" }}
+{{ $bodyRaw := $raw }}
+
+{{ with .Params }}
+  {{ if reflect.IsMap . }}
+    {{ $data = merge $data . }}
+  {{ end }}
+{{ end }}
+
+{{ $jsonMatches := findRE `(?s)^\s*\{.*\}` $raw 1 }}
+{{ if gt (len $jsonMatches) 0 }}
+  {{ $jsonBlock := index $jsonMatches 0 }}
+  {{ $parsed := $jsonBlock | transform.Unmarshal }}
+  {{ if reflect.IsMap $parsed }}
+    {{ $data = merge $data $parsed }}
+  {{ end }}
+  {{ $bodyRaw = strings.TrimSpace (replace $raw $jsonBlock "" 1) }}
+{{ end }}
+
+{{ $resolvedTitle := index $data "title" | default .Title }}
+{{ $resolvedIntro := index $data "intro" | default (index $data "pageDesc" | default "") }}
+{{ $sections := index $data "homeSections" | default (index $data "contentSections" | default (slice)) }}
+{{ $scores := index $data "scores" | default (index $data "scoreHistory" | default (slice)) }}
+{{ $body := "" }}
+{{ if ne (strings.TrimSpace $bodyRaw) "" }}
+  {{ $body = $bodyRaw | markdownify }}
+{{ end }}
+
+{{ return (dict
+  "data" $data
+  "title" $resolvedTitle
+  "intro" $resolvedIntro
+  "sections" $sections
+  "scores" $scores
+  "body" $body
+) }}

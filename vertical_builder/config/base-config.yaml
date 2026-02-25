@@ -1,0 +1,5 @@
+baseURL: "/"
+theme: "gymnastics"
+disableKinds:
+  - taxonomy
+  - term

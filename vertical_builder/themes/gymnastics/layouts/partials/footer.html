@@ -1,0 +1,64 @@
+{{ $data := partial "data_bundle.html" . }}
+{{ $address := "" }}
+{{ $orgName := $data.org.branding.displayName | default ($data.org.orgName | default ($data.settings.meta.title | default site.Title)) }}
+{{ $hours := $data.hours.hours | default (slice) }}
+{{ with $data.org.profile.address }}
+  {{ $parts := slice .line1 .line2 .city .state .postalCode .country }}
+  {{ $clean := slice }}
+  {{ range $parts }}{{ if ne . "" }}{{ $clean = $clean | append . }}{{ end }}{{ end }}
+  {{ $address = delimit $clean ", " }}
+{{ end }}
+
+{{ $socials := dict }}
+{{ with $data.org.contact.socials }}{{ $socials = . }}{{ end }}
+{{ with $data.org.profile.socials }}{{ $socials = . }}{{ end }}
+{{ with $data.org.branding.socials }}{{ $socials = . }}{{ end }}
+{{ $socialKeys := slice "facebook" "instagram" "x" "linkedin" "youtube" "tiktok" }}
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      {{ if gt (len $hours) 0 }}
+        <div class="footer-hours">
+          <div class="footer-hours-title">Hours</div>
+          {{ range $hours }}
+            <div class="footer-hours-row">
+              <span class="footer-hours-day">{{ .day }}</span>
+              {{ if .closed }}
+                <span class="footer-hours-time">Closed</span>
+              {{ else }}
+                <span class="footer-hours-time">{{ .open }} - {{ .close }}</span>
+              {{ end }}
+            </div>
+          {{ end }}
+        </div>
+      {{ end }}
+    </div>
+
+    <div class="footer-center">
+      <div class="footer-location">
+        {{ with $orgName }}<div class="footer-org-name">{{ . }}</div>{{ end }}
+        <div class="footer-address">{{ $address }}</div>
+      </div>
+
+      <div class="footer-socials" aria-label="Social links">
+        {{ range $socialKeys }}
+          {{ $key := . }}
+          {{ $url := index $socials $key | default "" }}
+          {{ if ne $url "" }}
+            <a class="footer-social-link" href="{{ $url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ title $key }}">
+              {{ partial "social_icon.html" (dict "name" $key) }}
+            </a>
+          {{ end }}
+        {{ end }}
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-tagline">&copy; {{ now.Format "2006" }} BuzzPoint | Built with ❤️ for communities</div>
+        <div class="footer-version">Last updated: {{ now.Format "2006-01-02 15:04 MST" }}</div>
+      </div>
+    </div>
+
+    <div class="footer-right"></div>
+  </div>
+</footer>

@@ -1,0 +1,77 @@
+{{ $org := dict }}
+{{ $navigation := dict }}
+{{ $settings := dict }}
+{{ $hero := dict "slides" (slice) }}
+{{ $calendar := dict "events" (slice) }}
+{{ $home := dict "sections" (slice) }}
+{{ $hours := dict "timezone" "" "hours" (slice) }}
+{{ $generatedAt := "" }}
+
+{{ with site.Data.org }}{{ $org = . }}{{ end }}
+{{ with site.Data.navigation }}{{ $navigation = . }}{{ end }}
+{{ with site.Data.site.settings }}{{ $settings = . }}{{ end }}
+{{ with site.Data.hero }}
+  {{ if reflect.IsSlice . }}
+    {{ $hero = dict "slides" . }}
+  {{ else }}
+    {{ $hero = . }}
+  {{ end }}
+{{ end }}
+{{ with site.Data.calendar.events }}
+  {{ if reflect.IsSlice . }}
+    {{ $calendar = dict "events" . }}
+  {{ else }}
+    {{ $calendar = . }}
+  {{ end }}
+{{ end }}
+{{ with site.Data.home.sections }}
+  {{ if reflect.IsSlice . }}
+    {{ $home = dict "sections" . }}
+  {{ else }}
+    {{ $home = . }}
+  {{ end }}
+{{ end }}
+{{ with site.Data.hours }}
+  {{ if reflect.IsSlice . }}
+    {{ $hours = dict "hours" . }}
+  {{ else }}
+    {{ $hours = . }}
+  {{ end }}
+{{ end }}
+
+{{ with site.Data.meta.site }}
+  {{ with .org }}{{ $org = . }}{{ end }}
+  {{ with .navigation }}{{ $navigation = . }}{{ end }}
+  {{ with .settings }}{{ $settings = . }}{{ end }}
+  {{ with .hero }}
+    {{ if reflect.IsSlice . }}
+      {{ $hero = dict "slides" . }}
+    {{ else }}
+      {{ $hero = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .calendar }}
+    {{ if reflect.IsSlice . }}
+      {{ $calendar = dict "events" . }}
+    {{ else }}
+      {{ $calendar = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .home }}
+    {{ if reflect.IsSlice . }}
+      {{ $home = dict "sections" . }}
+    {{ else }}
+      {{ $home = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .hours }}
+    {{ if reflect.IsSlice . }}
+      {{ $hours = dict "hours" . }}
+    {{ else }}
+      {{ $hours = . }}
+    {{ end }}
+  {{ end }}
+  {{ with .generatedAt }}{{ $generatedAt = . }}{{ end }}
+{{ end }}
+
+{{ return (dict "org" $org "navigation" $navigation "settings" $settings "hero" $hero "calendar" $calendar "home" $home "hours" $hours "generatedAt" $generatedAt) }}
