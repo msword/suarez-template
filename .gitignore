@@ -22,3 +22,12 @@ vertical_builder/themes/gymnastics/static/images/coaches/coachJH.jpg
 vertical_builder/themes/gymnastics/static/images/coaches/coachJN.jpg
 vertical_builder/themes/gymnastics/static/images/coaches/coachLS.jpg
 vertical_builder/themes/gymnastics/static/images/coaches/cropTeam.jpg
+.gitignore
+vertical_builder/__pycache__/__init__.cpython-311.pyc
+vertical_builder/__pycache__/app.cpython-311.pyc
+vertical_builder/__pycache__/bucket_service.cpython-311.pyc
+vertical_builder/__pycache__/builder_service.cpython-311.pyc
+vertical_builder/__pycache__/config.cpython-311.pyc
+vertical_builder/__pycache__/deploy_service.cpython-311.pyc
+vertical_builder/__pycache__/lock_service.cpython-311.pyc
+vertical_builder/__pycache__/receipt_service.cpython-311.pyc
